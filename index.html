@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 380px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    h1 { font-size: 28px; margin-bottom: 24px; }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input::placeholder { color: rgba(255,255,255,0.6); }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #e94560;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover { background: #c73652; }
+
+    .weather-info { display: none; }
+
+    .city-name { font-size: 28px; font-weight: bold; margin: 10px 0; }
+    .country { font-size: 16px; opacity: 0.8; margin-bottom: 20px; }
+    .temp { font-size: 64px; font-weight: bold; margin: 10px 0; }
+    .condition { font-size: 18px; opacity: 0.9; margin-bottom: 20px; }
+
+    .details {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .detail-item { text-align: center; }
+    .detail-label { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+    .detail-value { font-size: 18px; font-weight: bold; }
+
+    .error-msg {
+      color: #ff6b6b;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .loading {
+      display: none;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🌤️ Weather App</h1>
+
+    <div class="search-box">
+      <input
+        type="text"
+        id="cityInput"
+        placeholder="กรอกชื่อเมือง..."
+      />
+      <button onclick="getWeather()">ค้นหา</button>
+    </div>
+
+    <p class="loading" id="loading">⏳ กำลังโหลด...</p>
+    <p class="error-msg" id="errorMsg"></p>
+
+    <div class="weather-info" id="weatherInfo">
+      <img id="weatherIcon" src="" alt="weather icon" width="80">
+      <div class="city-name" id="cityName"></div>
+      <div class="country" id="countryName"></div>
+      <div class="temp" id="temperature"></div>
+      <div class="condition" id="condition"></div>
+
+      <div class="details">
+        <div class="detail-item">
+          <div class="detail-label">💧 ความชื้น</div>
+          <div class="detail-value" id="humidity"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">🌡️ รู้สึกเหมือน</div>
+          <div class="detail-value" id="feelsLike"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">🌬️ ลม</div>
+          <div class="detail-value" id="wind"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ← เปลี่ยนตรงนี้เป็น URL ของ Railway ครับ
+    const API_URL = 'https://myfirstapi-production-40f1.up.railway.app'
+
+    async function getWeather() {
+      const city = document.getElementById('cityInput').value.trim()
+
+      if (!city) {
+        showError('กรุณากรอกชื่อเมือง')
+        return
+      }
+
+      showLoading(true)
+      hideError()
+      hideWeather()
+
+      try {
+        const response = await fetch(`${API_URL}/weather/${city}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          showError(data.message)
+          return
+        }
+
+        displayWeather(data)
+
+      } catch (error) {
+        showError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+      } finally {
+        showLoading(false)
+      }
+    }
+
+    function displayWeather(data) {
+      document.getElementById('weatherIcon').src = 'https:' + data.icon
+      document.getElementById('cityName').textContent = data.city
+      document.getElementById('countryName').textContent = data.country
+      document.getElementById('temperature').textContent = `${data.temp_c}°C`
+      document.getElementById('condition').textContent = data.condition
+      document.getElementById('humidity').textContent = `${data.humidity}%`
+      document.getElementById('feelsLike').textContent = `${data.feels_like}°C`
+      document.getElementById('wind').textContent = `${data.wind_kph} km/h`
+
+      document.getElementById('weatherInfo').style.display = 'block'
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? 'block' : 'none'
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg')
+      el.textContent = msg
+      el.style.display = 'block'
+    }
+
+    function hideError() {
+      document.getElementById('errorMsg').style.display = 'none'
+    }
+
+    function hideWeather() {
+      document.getElementById('weatherInfo').style.display = 'none'
+    }
+
+    // กด Enter ได้เลย
+    document.getElementById('cityInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') getWeather()
+    })
+  </script>
+</body>
+</html>
