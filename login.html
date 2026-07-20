@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>เข้าสู่ระบบ - Weather App</title>
   <style>
     body {
@@ -113,7 +114,7 @@
           // เก็บ token ไว้ใช้ในหน้า index.html
           localStorage.setItem('token', data.token)
           localStorage.setItem('username', username)
-          window.location.href = 'index.html'
+          window.location.href = '/'
         } else {
           messageEl.textContent = 'สมัครสำเร็จ! กรุณาเข้าสู่ระบบ'
           switchBtn.click() // สลับไปโหมด login อัตโนมัติ
@@ -121,6 +122,13 @@
       } catch (error) {
         messageEl.textContent = 'เชื่อมต่อ server ไม่ได้'
         console.error(error)
+      }
+    })
+
+    // กด Enter เพื่อเข้าสู่ระบบหรือสมัครสมาชิกได้
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        submitBtn.click()
       }
     })
   </script>
