@@ -126,7 +126,12 @@
 </head>
 <body>
   <div class="card">
-    <h1>🌤️ Weather App</h1>
+    <div id="authBar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-size:14px;">
+  <span id="userInfo"></span>
+  <a id="authLink" href="login.html" style="color:#aad4ff; text-decoration:underline; cursor:pointer;"></a>
+</div>
+
+<h1>🌤️ Weather App</h1>
 
     <div class="search-box">
       <input
@@ -172,21 +177,24 @@
   <script>
     // ← เปลี่ยนตรงนี้เป็น URL ของ Railway ครับ
     const API_URL = 'https://myfirstapi-production-40f1.up.railway.app'
+    const token = localStorage.getItem('token')
+    const username = localStorage.getItem('username')
 
-    async function getWeather() {
-      const city = document.getElementById('cityInput').value.trim()
+   async function getWeather() {
+  const city = document.getElementById('cityInput').value.trim()
 
-      if (!city) {
-        showError('กรุณากรอกชื่อเมือง')
-        return
-      }
+  if (!city) {
+    showError('กรุณากรอกชื่อเมือง')
+    return
+  }
 
-      showLoading(true)
-      hideError()
-      hideWeather()
+  showLoading(true)
+  hideError()
+  hideWeather()
 
-      try {
-        const response = await fetch(`${API_URL}/weather/${city}`)
+  try {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+    const response = await fetch(`${API_URL}/weather/${city}`, { headers })
         const data = await response.json()
 
         if (!response.ok) {
@@ -235,6 +243,28 @@
       document.getElementById('weatherInfo').style.display = 'none'
     }
 
+    function updateAuthBar() {
+  const userInfoEl = document.getElementById('userInfo')
+  const authLinkEl = document.getElementById('authLink')
+
+  if (token && username) {
+    userInfoEl.textContent = `👤 สวัสดี ${username}`
+    authLinkEl.textContent = 'ออกจากระบบ'
+    authLinkEl.href = '#'
+    authLinkEl.onclick = (e) => {
+      e.preventDefault()
+      localStorage.removeItem('token')
+      localStorage.removeItem('username')
+      window.location.reload()
+    }
+  } else {
+    userInfoEl.textContent = '👤 ยังไม่เข้าสู่ระบบ'
+    authLinkEl.textContent = 'เข้าสู่ระบบ'
+    authLinkEl.href = 'login.html'
+    authLinkEl.onclick = null
+  }
+}
+
     // ✅ โหลดประวัติการค้นหา
     async function loadHistory() {
       try {
@@ -265,7 +295,9 @@
     })
 
     // โหลดประวัติทันทีตอนเปิดหน้าเว็บ
+    // โหลดประวัติทันทีตอนเปิดหน้าเว็บ
     loadHistory()
+    updateAuthBar()
   </script>
 </body>
 </html>

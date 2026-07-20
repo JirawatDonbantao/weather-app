@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เข้าสู่ระบบ - Weather App</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to bottom, #1e3a5f, #0f1c2e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+    .card {
+      background: rgba(255,255,255,0.1);
+      padding: 40px;
+      border-radius: 16px;
+      width: 320px;
+      color: white;
+    }
+    h2 { text-align: center; margin-bottom: 20px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: none;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #e94560;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    button:hover { background: #d63852; }
+    .switch-btn {
+      background: transparent;
+      color: #aad4ff;
+      text-decoration: underline;
+    }
+    #message {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2 id="formTitle">เข้าสู่ระบบ</h2>
+
+    <input type="text" id="username" placeholder="ชื่อผู้ใช้">
+    <input type="password" id="password" placeholder="รหัสผ่าน">
+
+    <button id="submitBtn">เข้าสู่ระบบ</button>
+    <button class="switch-btn" id="switchBtn">ยังไม่มีบัญชี? สมัครสมาชิก</button>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const API_URL = 'https://myfirstapi-production-40f1.up.railway.app'
+    let isLoginMode = true
+
+    const formTitle = document.getElementById('formTitle')
+    const submitBtn = document.getElementById('submitBtn')
+    const switchBtn = document.getElementById('switchBtn')
+    const messageEl = document.getElementById('message')
+
+    switchBtn.addEventListener('click', () => {
+      isLoginMode = !isLoginMode
+      formTitle.textContent = isLoginMode ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'
+      submitBtn.textContent = isLoginMode ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'
+      switchBtn.textContent = isLoginMode ? 'ยังไม่มีบัญชี? สมัครสมาชิก' : 'มีบัญชีแล้ว? เข้าสู่ระบบ'
+      messageEl.textContent = ''
+    })
+
+    submitBtn.addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim()
+      const password = document.getElementById('password').value.trim()
+
+      if (!username || !password) {
+        messageEl.textContent = 'กรุณากรอกให้ครบ'
+        return
+      }
+
+      const endpoint = isLoginMode ? '/login' : '/register'
+
+      try {
+        const response = await fetch(`${API_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          messageEl.textContent = data.message || 'เกิดข้อผิดพลาด'
+          return
+        }
+
+        if (isLoginMode) {
+          // เก็บ token ไว้ใช้ในหน้า index.html
+          localStorage.setItem('token', data.token)
+          localStorage.setItem('username', username)
+          window.location.href = 'index.html'
+        } else {
+          messageEl.textContent = 'สมัครสำเร็จ! กรุณาเข้าสู่ระบบ'
+          switchBtn.click() // สลับไปโหมด login อัตโนมัติ
+        }
+      } catch (error) {
+        messageEl.textContent = 'เชื่อมต่อ server ไม่ได้'
+        console.error(error)
+      }
+    })
+  </script>
+
+</body>
+</html>
