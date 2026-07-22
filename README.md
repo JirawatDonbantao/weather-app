@@ -4,7 +4,7 @@
 
 เป็นส่วนหนึ่งของการเรียนรู้ **DevOps และ Cloud Engineering** — โปรเจกต์นี้เน้นการเชื่อมต่อ Frontend และ Backend ที่ Deploy แยกกันคนละ Cloud Platform เข้าด้วยกัน รวมถึงการทำระบบ Authentication แบบ End-to-End
 
-🔗 **Live Demo:** [weather-jsllbndd5-jirawatdonbantao1.vercel.app](https://weather-jsllbndd5-jirawatdonbantao1.vercel.app)
+🔗 **Live Demo:** [weather-jsllbndd5-jirawatdonbantao1.vercel.app](https://weather-app-two-nu-24.vercel.app/)
 
 ---
 
